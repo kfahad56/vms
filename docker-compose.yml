@@ -2,7 +2,10 @@ version: '3.7'
 services: 
   alert:
     image: fahad56/vms-alert:1.0
-    container_name: Alerts
+    container_name: alert
+    volumes:
+      - .:/app
+    container_name: fastapi
     ports: 
       - 8000:8000
     command: "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
@@ -10,13 +13,15 @@ services:
       - app-network
     depends_on: 
       - mongo
-  
+
   shinobi:
         image: fahad56/vms:1.0
         container_name: Shinobi
         environment:
           - PLUGIN_KEYS={"Tensorflow":"275f20d5b186421deb377c88bb826"}
           - SSL_ENABLED=false
+        volumes:
+          - ./db:/var/lib/mysql
         ports:
           - 8080:8080
         restart: unless-stopped
@@ -32,29 +37,16 @@ services:
         restart: unless-stopped
         networks: 
           - app-network
-        depends_on:
-          - alert
-  
-  trudesk:
-    image: fahad56/vms-ticketing:1.0
-    restart: always
-    ports:
-      - "8118:8118"
-    environment:
-      NODE_ENV: production
-      TRUDESK_DOCKER: "true"
-      TD_MONGODB_SERVER: mongo
-      TD_MONGODB_DATABASE: trudesk
 
   mongo:
-    image: mongo
+    image: mongo:3.6
     container_name: mongo
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: media123
+    ports:
+      - 27017:27017
     volumes:
       - ./database:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks: 
       - app-network
 
@@ -65,12 +57,32 @@ services:
     ports:
       - 8081:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: media123
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: media123
+      ME_CONFIG_MONGODB_ADMINUSERNAME: trudesk
+      ME_CONFIG_MONGODB_ADMINPASSWORD: TruDesk1
+      ME_CONFIG_BASICAUTH_USERNAME: trudesk
+      ME_CONFIG_BASICAUTH_PASSWORD: TruDesk1
     networks: 
       - app-network
+    depends_on:
+      - mongo
+
+  trudesk:
+    image: fahad56/vms-ticketing:1.0
+    restart: always
+    container_name: ticketing
+    ports:
+      - 8118:8118
+    volumes: 
+      - ./images:/usr/src/trudesk/public/images
+    environment:
+      NODE_ENV: production
+      TRUDESK_DOCKER: "true"
+      TD_MONGODB_SERVER: mongo
+      TD_MONGODB_DATABASE: trudesk
+    networks: 
+      - app-network
+    depends_on:
+      - mongo
 
 networks: 
   app-network:

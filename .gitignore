@@ -1,2 +1,5 @@
-./db
-
+.vscode
+database
+db
+*.jpg
+.git
