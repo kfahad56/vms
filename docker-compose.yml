@@ -1,7 +1,7 @@
 version: '3.7'
 services: 
   alert:
-    image: fahad56/vms-alert:1.0
+    image: fahad56/vms-alert:nano
     container_name: alert
     ports: 
       - 8000:8000
@@ -14,7 +14,7 @@ services:
       - mongo
 
   shinobi:
-        image: fahad56/vms:1.0
+        image: fahad56/vms:nano
         container_name: Shinobi
         environment:
           - PLUGIN_KEYS={"Tensorflow":"275f20d5b186421deb377c88bb826"}
@@ -28,7 +28,7 @@ services:
           - app-network
   
   shinobiplugintensorflow:
-        image: fahad56/vms-ai:1.0
+        image: fahad56/vms-ai:nano6
         container_name: shinobi-tensorflow
         environment:
           - PLUGIN_KEY=275f20d5b186421deb377c88bb826
@@ -66,7 +66,7 @@ services:
       - mongo
 
   trudesk:
-    image: fahad56/vms-ticketing:1.0
+    image: fahad56/vms-ticketing:nano
     restart: always
     container_name: ticketing
     ports:
