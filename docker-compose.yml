@@ -33,6 +33,7 @@ services:
         environment:
           - PLUGIN_KEY=275f20d5b186421deb377c88bb826
           - PLUGIN_HOST=Shinobi
+          - NVIDIA_DISABLE_REQUIRE=1
         restart: unless-stopped
         networks: 
           - app-network
